@@ -6,8 +6,8 @@ import shutil
 
 from fiona import collection
 
-from geoalchemy import GeometryColumn
-from geoalchemy import Point, LineString, Polygon
+from geoalchemy import GeometryColumn, GeometryExtensionColumn
+from geoalchemy import Geometry, Point, LineString, Polygon
 
 GEO_COLUMN_NAME = 'geom'
 
@@ -53,11 +53,11 @@ def define_geo_column(col):
     name = col.dest_column_name
     dim = col.column_lenght
     if col.column_type == 'Point':
-         return GeometryColumn(Point(dim))
+         return GeometryExtensionColumn(name, Geometry(dim))
     elif col.column_type == 'LineString':
-         return GeometryColumn(LineString(dim))
+         return GeometryExtensionColumn(name, Geometry(dim))
     elif col.column_type == 'Polygon':
-         return GeometryColumn(Polygon(dim))
+         return GeometryExtensionColumn(name, Geometry(dim))
     else:
         raise NotImplementedError
 
