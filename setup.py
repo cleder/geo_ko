@@ -21,8 +21,9 @@ setup(name='geo_ko',
           # -*- Extra requirements: -*-
           'kotti_rdbt',
           'Fiona',
-          'GeoAlchemy',
+          'GeoAlchemy2',
           'fastkml',
+          'geojson',
       ],
       entry_points="""
       # -*- Entry points: -*-

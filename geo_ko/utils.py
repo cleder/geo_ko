@@ -11,9 +11,9 @@ from shapely.geometry import asShape
 
 from sqlalchemy import Column
 
-from geoalchemy import GeometryColumn, GeometryExtensionColumn
-from geoalchemy import Geometry, Point, LineString, Polygon
-from geoalchemy import WKTSpatialElement
+
+from geoalchemy2 import Geometry, Geography
+from geoalchemy2 import WKTElement
 
 GEO_COLUMN_NAME = 'geom'
 
@@ -50,7 +50,7 @@ def populate_geo_table(table, data, mapping):
                             insert[dest] = record['properties'][src]
                     if GEO_COLUMN_NAME in table.c.keys():
                         #insert[GEO_COLUMN_NAME] = asShape(record['geometry']).wkt
-                        insert[GEO_COLUMN_NAME] = WKTSpatialElement(asShape(record['geometry']).wkt)
+                        insert[GEO_COLUMN_NAME] = WKTElement(asShape(record['geometry']).wkt)
                     #print insert
 
                     table.insert().values(**insert).execute()
@@ -99,13 +99,4 @@ def extract_geometry_info(data):
 def define_geo_column(col):
     name = col.dest_column_name
     dim = col.column_lenght
-    return Column(name, Geometry(dim))
-    if col.column_type == 'Point':
-         return GeometryExtensionColumn(name, Point(dim))
-    elif col.column_type == 'LineString':
-         return GeometryExtensionColumn(name, LineString(dim))
-    elif col.column_type == 'Polygon':
-         return GeometryExtensionColumn(name, Polygon(dim))
-    else:
-        raise NotImplementedError
-
+    return Column(name, Geography(srid=4326, dimension=dim))
