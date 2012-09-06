@@ -6,11 +6,9 @@ import shutil
 
 from fiona import collection
 
-#from pygeoif import as_shape as asShape
 from shapely.geometry import asShape
 
 from sqlalchemy import Column
-
 
 from geoalchemy2 import Geometry, Geography
 from geoalchemy2 import WKTElement
@@ -43,15 +41,21 @@ def populate_geo_table(table, data, mapping):
     for filename in filenames:
         if filename.endswith('.shp'):
             with collection(tmpdir + '/' + filename) as source:
+                dbf_mapping = {}
+                for sk in source.schema['properties'].keys():
+                    dbf_mapping[sk.lower()] = sk
+                #the source column names extracted by pydbf are lowercase
+                #fiona expects them to be mixed case
+                for k, v in mapping.iteritems():
+                    if v['name'] in dbf_mapping:
+                        v['name'] = dbf_mapping[v['name']]
                 for record in source:
                     insert = {}
                     for dest, src in mapping.iteritems():
-                        if src in record['properties']:
-                            insert[dest] = record['properties'][src]
+                        if src['name'] in record['properties']:
+                            insert[dest] = record['properties'][src['name']]
                     if GEO_COLUMN_NAME in table.c.keys():
-                        #insert[GEO_COLUMN_NAME] = asShape(record['geometry']).wkt
                         insert[GEO_COLUMN_NAME] = WKTElement(asShape(record['geometry']).wkt)
-                    #print insert
 
                     table.insert().values(**insert).execute()
 
